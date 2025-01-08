@@ -74,3 +74,5 @@ pm2.pid
 *.zip
 *.tgz
 *.tar
+
+uploads
