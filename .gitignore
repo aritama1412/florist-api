@@ -75,4 +75,5 @@ pm2.pid
 *.tgz
 *.tar
 
-
+/uploads/*
+!/uploads/.gitkeep
