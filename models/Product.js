@@ -2,6 +2,7 @@ const { DataTypes } = require("sequelize");
 const sequelize = require("../config/database");
 const Image = require("./Image");
 const Category = require("./Category");
+const Supplier = require("./Supplier");
 
 const Product = sequelize.define(
   "Product",
@@ -12,6 +13,10 @@ const Product = sequelize.define(
       autoIncrement: true,
     },
     id_category: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+    },
+    id_supplier: {
       type: DataTypes.INTEGER,
       allowNull: false,
     },
@@ -70,10 +75,14 @@ Product.hasMany(Image, {
   sourceKey: "id_product",
 });
 
-// Define the relationship
 Product.belongsTo(Category, {
   foreignKey: "id_category",
   targetKey: "id_category",
+});
+
+Product.belongsTo(Supplier, {
+  foreignKey: "id_supplier",
+  targetKey: "id_supplier",
 });
 
 module.exports = Product;

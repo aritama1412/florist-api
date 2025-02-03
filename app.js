@@ -15,7 +15,7 @@ const app = express();
 // Enable CORS for all routes and all origins
 app.use(cors()); // Allow all origins (not recommended for production)
 app.use(express.json());
-const PORT = process.env.PORT || 4000;
+const PORT = process.env.PORT || 3005;
 
 // Function to serve all static files
 // inside public directory.
@@ -40,6 +40,6 @@ sequelize.sync({ force: false }).then(() => {
   console.log("Database connected and models synchronized.");
 
   app.listen(PORT, () => {
-    console.log("Server is running on http://localhost:4000");
+    console.log("Server is running on http://localhost:" + PORT);
   });
 });

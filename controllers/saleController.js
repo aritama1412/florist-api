@@ -100,6 +100,56 @@ const createSale = async (req, res) => {
   }
 };
 
+const editSale = async (req, res) => {
+  const transaction = await Sale.sequelize.transaction();
+
+  try {
+    const { id_sale, status, updated_by } = req.body;
+
+    if (!id_sale || !status || !updated_by) {
+      return res.status(400).json({
+        status: "error",
+        message: "Missing required fields",
+        data: req.body,
+      });
+    }
+
+    const existingSale = await Sale.findByPk(id_sale);
+    if (!existingSale) {
+      return res.status(404).json({
+        status: "error",
+        message: "Transaction not found",
+        data: null,
+      });
+    }
+
+    await existingSale.update(
+      {
+        id_sale,
+        status,
+        updated_by,
+        updated_at: new Date(),
+      },
+      { transaction }
+    );
+
+    await transaction.commit();
+
+    return res.status(201).json({
+      status: "success",
+      message: "Transaction edited successfully",
+      data: existingSale,
+    });
+  } catch (error) {
+    await transaction.rollback();
+    return res.status(500).json({
+      status: "error",
+      message: error.message,
+      data: null,
+    });
+  }
+};
+
 // ✅ Get all sales
 const getAllSales = async (req, res) => {
   try {
@@ -113,8 +163,15 @@ const getAllSales = async (req, res) => {
 // ✅ Get a sale by ID
 const getSaleById = async (req, res) => {
   try {
-    const { id } = req.params;
-    const sale = await Sale.findByPk(id, { include: SaleDetail });
+    const { id } = req.query;
+    const sale = await Sale.findByPk(id, {
+      include: [
+        {
+          model: SaleDetail,
+          include: Product, // Include Product in SaleDetail
+        },
+      ],
+    });
     if (!sale) {
       return res
         .status(404)
@@ -192,6 +249,7 @@ const checkTransaction = async (req, res) => {
 
 module.exports = {
   createSale,
+  editSale,
   getAllSales,
   getSaleById,
   checkTransaction,

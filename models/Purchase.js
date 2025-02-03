@@ -1,5 +1,6 @@
 const { DataTypes } = require("sequelize");
 const sequelize = require("../config/database");
+const PurchaseDetail = require("./PurchaseDetail");
 
 const Purchase = sequelize.define(
   "Purchase",
@@ -9,6 +10,10 @@ const Purchase = sequelize.define(
       primaryKey: true,
       autoIncrement: true,
     },
+    bill: {
+      type: DataTypes.STRING(45),
+      allowNull: false,
+    },
     grand_total: {
       type: DataTypes.DOUBLE(15, 2),
       allowNull: false,
@@ -16,6 +21,10 @@ const Purchase = sequelize.define(
     },
     purchase_date: {
       type: DataTypes.DATE,
+      allowNull: true,
+    },
+    note: {
+      type: DataTypes.TEXT,
       allowNull: true,
     },
     status: {
@@ -47,5 +56,11 @@ const Purchase = sequelize.define(
     timestamps: false,
   }
 );
+
+// Add association
+Purchase.hasMany(PurchaseDetail, {
+  foreignKey: "id_purchase", // The foreign key
+  sourceKey: "id_purchase", // The primary key
+});
 
 module.exports = Purchase;
