@@ -2,6 +2,8 @@ const Purchase = require("../models/Purchase");
 const PurchaseDetail = require("../models/PurchaseDetail");
 const Product = require("../models/Product");
 const Supplier = require("../models/Supplier");
+const { Sequelize, Op } = require("sequelize"); // Import Sequelize and Op from Sequelize
+const fs = require("fs");
 
 const getAllPurchases = async (req, res) => {
   try {
@@ -45,10 +47,39 @@ const createPurchase = async (req, res) => {
   try {
     const { grand_total, created_by, details } = req.body;
 
-    // ✅ Create purchase
+    // ✅ Format today's date in yyyyMMdd format
+    const today = new Date();
+    const formattedDate =
+      today.getFullYear() +
+      ("0" + (today.getMonth() + 1)).slice(-2) +
+      ("0" + today.getDate()).slice(-2);
+
+    // ✅ Generate the bill number
+    const lastBill = await Purchase.findOne({
+      where: {
+        bill: {
+          [Op.like]: `INVP${formattedDate}%`, // Use Op.like to query for similar bills
+        },
+      },
+      order: [["created_at", "DESC"]], // Get the latest purchase
+    });
+
+    let newBillNumber = "0001"; // Default to 0001 if no previous bill found
+
+    if (lastBill) {
+      // Extract the last number from the bill string and increment it
+      const lastNumber = parseInt(lastBill.bill.slice(-4), 10);
+      const newNumber = lastNumber + 1;
+      newBillNumber = newNumber.toString().padStart(4, "0");
+    }
+
+    const newBill = `INVP${formattedDate}${newBillNumber}`;
+
+    // ✅ Create the purchase record
     const newPurchase = await Purchase.create(
       {
         grand_total,
+        bill: newBill,
         purchase_date: new Date(),
         status: "0",
         created_by,
@@ -56,7 +87,7 @@ const createPurchase = async (req, res) => {
       { transaction }
     );
 
-    // ✅ Create purchase details
+    // ✅ Create the purchase details
     const purchaseDetailsData = details.map((detail) => ({
       id_purchase: newPurchase.id_purchase,
       id_product: detail.id_product,
