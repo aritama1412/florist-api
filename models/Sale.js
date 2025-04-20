@@ -36,9 +36,20 @@ const Sale = sequelize.define(
       defaultValue: 0.0,
     },
     status: {
+      // type: DataTypes.ENUM("0", "1", "2"),
+      // defaultValue: "0",
+      // comment: "0=pending, 1=lunas, 2=batal",
       type: DataTypes.ENUM("0", "1", "2"),
       defaultValue: "0",
       comment: "0=pending, 1=lunas, 2=cancel",
+      get() {
+        const statusMapping = {
+          "0": "pending",
+          "1": "lunas",
+          "2": "batal",
+        };
+        return statusMapping[this.getDataValue("status")];
+      },
     },
     date_sale: {
       type: DataTypes.DATE,
