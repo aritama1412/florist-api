@@ -60,7 +60,7 @@ const createSale = async (req, res) => {
         grand_total,
         status,
         date_sale,
-        date_pick_up,
+        date_pick_up: null,
         pick_up_type,
         created_by,
       },
