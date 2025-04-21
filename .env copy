@@ -1,6 +1,0 @@
-# Example .env file
-PORT=4000
-DB_HOST=localhost
-DB_USER=root
-DB_PASS=yourpassword
-JWT_SECRET_KEY=tokobunga

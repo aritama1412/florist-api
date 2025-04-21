@@ -2,7 +2,7 @@ const Product = require("../models/Product");
 const { Sequelize, Op } = require("sequelize"); // Import Sequelize operators
 const path = require("path");
 const fs = require("fs");
-const multer = require("multer");
+const multer = require("multer");// Berhubungan dengan pengelolaan file upload
 const Image = require("../models/Image"); // Your image model
 const Category = require("../models/Category");
 
@@ -252,7 +252,7 @@ const createProduct = async (req, res) => {
         created_by: creator,
         status: "1",
       },
-      { transaction }
+      { transaction } // Untukan transaction untuk rollback jika terjadi error
     );
 
     // ✅ Handle image uploads (only if images are provided)
