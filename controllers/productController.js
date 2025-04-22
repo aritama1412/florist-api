@@ -12,13 +12,9 @@ const storage = multer.diskStorage({
     cb(null, "uploads/"); // Ensure this directory exists
   },
   filename: function (req, file, cb) {
-    // Generate current date in YYYYMMDD format
     const currentDate = new Date().toISOString().slice(0, 10).replace(/-/g, ""); // Example: 20241217
-    // Generate a random 4-digit number (1000-9999)
     const randomNumber = Math.floor(10000 + Math.random() * 90000); // Example: 54321
-    // Get the file extension
     const fileExtension = path.extname(file.originalname); // Example: .jpg, .png, etc.
-    // Combine them to create the final filename
     const newFileName = `${currentDate}_${randomNumber}${fileExtension}`; // Example: 2024121754321.jpg
     cb(null, newFileName);
   },
@@ -229,11 +225,11 @@ const createProduct = async (req, res) => {
   const transaction = await Product.sequelize.transaction();
 
   try {
-    const { product_name, id_category, price, stock, description, creator } =
+    const { product_name, id_category, id_supplier, price, stock, description, creator } =
       req.body;
 
     // Check for required fields
-    if (!product_name || !id_category || !price || !stock || !creator) {
+    if (!product_name || !id_category || !id_supplier || !price || !stock || !creator) {
       return res.status(400).json({
         status: "error",
         message: "Missing required fields",
@@ -246,6 +242,7 @@ const createProduct = async (req, res) => {
       {
         product_name,
         id_category,
+        id_supplier,
         price,
         stock,
         description,

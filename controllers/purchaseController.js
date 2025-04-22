@@ -91,12 +91,43 @@ const createPurchase = async (req, res) => {
     const purchaseDetailsData = details.map((detail) => ({
       id_purchase: newPurchase.id_purchase,
       id_product: detail.id_product,
+      id_supplier: detail.id_supplier,
       price: detail.price,
       quantity: detail.quantity,
       sub_total: detail.price * detail.quantity,
     }));
 
     await PurchaseDetail.bulkCreate(purchaseDetailsData, { transaction });
+
+    // update stock in product
+    // Step 1: Retrieve current stock for the specified products
+    const productIds = details.map((detail) => detail.id_product);
+    const products = await Product.findAll({
+      where: { id_product: productIds },
+      transaction,
+    });
+    
+    // Step 2: Map updated stock values
+    const updatedProducts = products.map((product) => {
+      const detail = details.find((detail) => detail.id_product === product.id_product);
+      if (!detail) {
+        throw new Error(`Detail not found for product ID: ${product.id_product}`);
+      }
+      return {
+        id_product: product.id_product,
+        stock: product.stock + Number(detail.quantity),
+      };
+    });
+
+    // Step 3: Update the database with new stock values
+    await Promise.all(
+      updatedProducts.map((updatedProduct) =>
+        Product.update(
+          { stock: updatedProduct.stock },
+          { where: { id_product: updatedProduct.id_product }, transaction }
+        )
+      )
+    );
 
     await transaction.commit();
 
@@ -107,6 +138,7 @@ const createPurchase = async (req, res) => {
     return res.status(201).json({
       status: "success",
       message: "Purchase created successfully",
+      details: details,
       data: purchaseData,
     });
   } catch (error) {

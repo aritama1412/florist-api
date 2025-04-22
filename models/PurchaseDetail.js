@@ -18,6 +18,10 @@ const PurchaseDetail = sequelize.define(
       type: DataTypes.INTEGER,
       allowNull: false,
     },
+    id_supplier: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+    },
     price: {
       type: DataTypes.DOUBLE(15, 2),
       allowNull: false,
