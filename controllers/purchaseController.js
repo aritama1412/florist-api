@@ -45,7 +45,7 @@ const getAllPurchases = async (req, res) => {
 const createPurchase = async (req, res) => {
   const transaction = await Purchase.sequelize.transaction();
   try {
-    const { grand_total, created_by, details } = req.body;
+    const { grand_total, created_by, note, details } = req.body;
 
     // ✅ Format today's date in yyyyMMdd format
     const today = new Date();
@@ -80,6 +80,7 @@ const createPurchase = async (req, res) => {
       {
         grand_total,
         bill: newBill,
+        note,
         purchase_date: new Date(),
         status: "0",
         created_by,
@@ -198,7 +199,7 @@ const editPurchase = async (req, res) => {
   const transaction = await Purchase.sequelize.transaction();
 
   try {
-    const { id_purchase, status, updated_by } = req.body;
+    const { id_purchase, status, note, updated_by } = req.body;
 
     if (!id_purchase || !status || !updated_by) {
       return res.status(400).json({
@@ -208,6 +209,17 @@ const editPurchase = async (req, res) => {
       });
     }
 
+    let newStatus = '';
+    if(status == "menunggu pembayaran"){
+      newStatus = "0";
+    }else if (status == "proses"){
+      newStatus = "1";
+    }else if(status == "selesai"){
+      newStatus = "2";
+    }else if(status == "batal"){
+      newStatus = "3";
+    }
+    
     const existingPurchase = await Purchase.findByPk(id_purchase);
     if (!existingPurchase) {
       return res.status(404).json({
@@ -220,7 +232,8 @@ const editPurchase = async (req, res) => {
     await existingPurchase.update(
       {
         id_purchase,
-        status,
+        status: newStatus,
+        note,
         updated_by,
         updated_at: new Date(),
       },

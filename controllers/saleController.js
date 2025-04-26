@@ -113,6 +113,17 @@ const editSale = async (req, res) => {
         data: req.body,
       });
     }
+    
+    let newStatus = '';
+    if(status == "menunggu pembayaran"){
+      newStatus = "0";
+    }else if (status == "proses"){
+      newStatus = "1";
+    }else if(status == "selesai"){
+      newStatus = "2";
+    }else if(status == "batal"){
+      newStatus = "3";
+    }
 
     const existingSale = await Sale.findByPk(id_sale);
     if (!existingSale) {
@@ -126,7 +137,7 @@ const editSale = async (req, res) => {
     await existingSale.update(
       {
         id_sale,
-        status,
+        status: newStatus,
         updated_by,
         updated_at: new Date(),
       },

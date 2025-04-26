@@ -28,10 +28,19 @@ const Purchase = sequelize.define(
       allowNull: true,
     },
     status: {
-      type: DataTypes.ENUM("0", "1", "2"),
+      type: DataTypes.ENUM("0", "1", "2", "3"),
       allowNull: false,
       defaultValue: "0",
-      comment: "0=pending, 1=lunas, 2=cancel",
+      comment: "0=menunggu pembayaran, 1=proses, 2=selesai, 3=batal",
+      get() {
+        const statusMapping = {
+          "0": "menunggu pembayaran",
+          "1": "proses",
+          "2": "selesai",
+          "3": "batal",
+        };
+        return statusMapping[this.getDataValue("status")];
+      },
     },
     created_by: {
       type: DataTypes.INTEGER,
