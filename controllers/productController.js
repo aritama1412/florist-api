@@ -36,6 +36,7 @@ const getAllProducts = async (req, res) => {
       const products = await Product.findAll({
         limit: limit,
         offset: offset,
+        where: { status: "1" }, // Only active images
         include: [
           {
             model: Image,
@@ -366,6 +367,58 @@ const editProduct = async (req, res) => {
   }
 };
 
+const deleteProduct = async (req, res) => {
+  const transaction = await Product.sequelize.transaction();
+
+  try {
+    const {id_product} = req.body;
+
+    if (
+      !id_product) {
+      return res.status(400).json({
+        status: "error",
+        message: "Missing required fields",
+        data: req.body,
+      });
+    }
+
+    const existingProduct = await Product.findByPk(id_product);
+    if (!existingProduct) {
+      return res.status(404).json({
+        status: "error",
+        message: "Product not found",
+        data: null,
+      });
+    }
+
+    // ✅ Update the product
+    await existingProduct.update(
+      {
+        status: '0',
+        updated_by: 1,
+        updated_at: new Date(),
+      },
+      { transaction }
+    );
+
+    await transaction.commit();
+    
+    return res.status(201).json({
+      status: "success",
+      message: "Product deleted successfully",
+      data: existingProduct,
+    });
+  } catch (error) {
+    await transaction.rollback();
+    return res.status(500).json({
+      status: "error",
+      message: error.message,
+      data: null,
+    });
+  }
+};
+
+
 module.exports = {
   createProduct,
   upload,
@@ -378,5 +431,6 @@ module.exports = {
   getProductById,
   createProduct,
   editProduct,
+  deleteProduct,
   upload,
 };

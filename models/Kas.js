@@ -34,6 +34,10 @@ const Kas = sequelize.define(
       type: DataTypes.DATE,
       defaultValue: DataTypes.NOW,
     },
+    keterangan: {
+      type: DataTypes.TEXT,
+      allowNull: true,
+    }
   },
   {
     tableName: "kas",
@@ -41,4 +45,4 @@ const Kas = sequelize.define(
   }
 );
 
-module.exports = Sale;
+module.exports = Kas;

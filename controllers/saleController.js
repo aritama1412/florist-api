@@ -2,6 +2,7 @@ const helper = require("../helper/helper");
 const Sale = require("../models/Sale");
 const SaleDetail = require("../models/SaleDetail");
 const Product = require("../models/Product");
+const Kas = require("../models/Kas");
 const { Op } = require("sequelize");
 
 // ✅ Create a new sale
@@ -20,7 +21,7 @@ const createSale = async (req, res) => {
       grand_total,
       status,
       date_sale,
-      date_pick_up,
+      date_estimation,
       pick_up_type,
       created_by,
       details,
@@ -60,9 +61,22 @@ const createSale = async (req, res) => {
         grand_total,
         status,
         date_sale,
-        date_pick_up: null,
+        date_estimation: null,
         pick_up_type,
         created_by,
+      },
+      { transaction }
+    );
+
+    // get the id sale
+    const id_sale = newSale.id_sale;
+    const kas = await Kas.create(
+      {
+        id_sale,
+        type: "in",
+        total: grand_total,
+        tanggal: date_sale,
+        keterangan: "Penjualan",
       },
       { transaction }
     );
@@ -77,6 +91,13 @@ const createSale = async (req, res) => {
     }));
 
     await SaleDetail.bulkCreate(saleDetailsData, { transaction });
+
+    // Update product stock
+    for (const detail of details) {
+      const product = await Product.findByPk(detail.id_product);
+      product.stock -= detail.quantity;
+      await product.save({ transaction });
+    }
 
     await transaction.commit();
 
@@ -104,7 +125,7 @@ const editSale = async (req, res) => {
   const transaction = await Sale.sequelize.transaction();
 
   try {
-    const { id_sale, status, updated_by } = req.body;
+    const { id_sale, date_estimation, date_received, status, updated_by } = req.body;
 
     if (!id_sale || !status || !updated_by) {
       return res.status(400).json({
@@ -133,11 +154,26 @@ const editSale = async (req, res) => {
         data: null,
       });
     }
+    const formatDate = (date) => {
+      const { year, month, day } = date;
+      // Ensure month and day are always two digits
+      const formattedMonth = month.toString().padStart(2, '0');
+      const formattedDay = day.toString().padStart(2, '0');
+      return `${year}-${formattedMonth}-${formattedDay}`;
+    };
+    
+    const formattedDateEstimation = formatDate(date_estimation);
+    const formattedDateReceived = formatDate(date_received);
+
+    console.log('formattedDateEstimation', formattedDateEstimation)
+    console.log('formattedDateReceived', formattedDateReceived)
 
     await existingSale.update(
       {
         id_sale,
         status: newStatus,
+        date_estimation: formattedDateEstimation,
+        date_received: formattedDateReceived,
         updated_by,
         updated_at: new Date(),
       },

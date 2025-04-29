@@ -56,7 +56,11 @@ const Sale = sequelize.define(
       type: DataTypes.DATE,
       allowNull: true,
     },
-    date_pick_up: {
+    date_estimation: {
+      type: DataTypes.DATE,
+      allowNull: true,
+    },
+    date_received: {
       type: DataTypes.DATE,
       allowNull: true,
     },
