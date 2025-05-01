@@ -4,6 +4,8 @@ const Category = require("../models/Category");
 const getAllCategories = async (req, res) => {
   try {
     const categories = await Category.findAll();
+    // insert id_category=0, name=Semua Kategori, status=1 
+    categories.unshift({ id_category: 0, name: "Semua Kategori", status: "1" });
     res.status(200).json(categories);
   } catch (error) {
     res.status(500).json({ error: error.message });

@@ -26,63 +26,52 @@ const upload = multer({ storage: storage });
 // ✅ Get all products
 const getAllProducts = async (req, res) => {
   try {
-    const { limit = 20, offset = 0, categories } = req.query;
+    const { limit = 20, offset = 0, category = 0 } = req.query;
+    // Parse limit and offset as integers
+    const parsedLimit = parseInt(limit) || 20; // Default to 20 items per page
+    const parsedOffset = parseInt(offset) || 0; // Default to starting at 0
+    const parsedCategory = parseInt(category) || 0; // Default to category 0
+    // Handle category filtering
+    const whereCondition =
+      parsedCategory === 0
+        ? { status: "1" } // Get all active products if category is 0
+        : { id_category: parsedCategory, status: "1" }; // Filter by specific category
+        console.log('whereCondition', whereCondition)
 
-    if (!categories) {
-      const limit = parseInt(req.query.limit) || 20; // Default to 20 items
-      const offset = parseInt(req.query.offset) || 0; // Default to 0 (start)
+    // Fetch the total count of products
+    const totalProducts = await Product.count({
+      where: whereCondition,
+    });
 
-      // Fetch products with associated images
-      const products = await Product.findAll({
-        limit: limit,
-        offset: offset,
-        where: { status: "1" }, // Only active images
-        include: [
-          {
-            model: Image,
-            where: { status: "1" }, // Only active images
-            required: false, // Products with or without images
-          },
-        ],
-      });
+    // Calculate the total number of pages
+    const totalPages = Math.ceil(totalProducts / parsedLimit);
 
-      return res.status(200).json({
-        status: "success",
-        message: "Products retrieved successfully",
-        data: products,
-      });
-    } else {
-      const categoryIds = categories
-        .split(",")
-        .map((id) => parseInt(id))
-        .filter((id) => !isNaN(id));
-
-      const limit = parseInt(req.query.limit) || 20; // Default to 20 items
-      const offset = parseInt(req.query.offset) || 0; // Default to 0 (start)
-
-      const products = await Product.findAll({
-        where: {
-          id_category: {
-            [Op.in]: categoryIds,
-          },
+    // Fetch products with pagination and optional category filtering
+    // order by product name asc and where status = 1
+    const products = await Product.findAll({
+      where: whereCondition,
+      limit: parsedLimit,
+      offset: parsedOffset,
+      include: [
+        {
+          model: Image,
+          where: { status: "1" }, // Only active images
+          required: false, // Include products with or without images
         },
-        limit,
-        offset,
-        include: [
-          {
-            model: Image,
-            where: { status: "1" }, // Only active images
-            required: false, // Products with or without images
-          },
-        ],
-      });
+      ],
+      order: [["product_name", "ASC"]], 
+    });
 
-      return res.status(200).json({
-        status: "success",
-        message: "Products retrieved successfully",
-        data: products,
-      });
-    }
+    return res.status(200).json({
+      status: "success",
+      message: "Products retrieved successfully",
+      data: {
+        products,
+        totalProducts,
+        totalPages,
+        currentPage: Math.floor(parsedOffset / parsedLimit) + 1,
+      },
+    });
   } catch (error) {
     return res.status(500).json({
       status: "error",
@@ -91,6 +80,8 @@ const getAllProducts = async (req, res) => {
     });
   }
 };
+
+
 
 // ✅ Get all products
 const getAllProductsAdmin = async (req, res) => {
