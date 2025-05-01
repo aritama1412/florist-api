@@ -68,6 +68,17 @@ const createSale = async (req, res) => {
       { transaction }
     );
 
+    // the data is id_product, loop it and get product name from model Product
+    const productNames = await Promise.all(
+      details.map(async (detail) => {
+        const product = await Product.findByPk(detail.id_product, { transaction });
+        return product.product_name + " : " + detail.quantity ;
+      })
+    );
+
+    // create a string message
+    const message = productNames.join(", ");
+
     // get the id sale
     const id_sale = newSale.id_sale;
     const kas = await Kas.create(
@@ -76,7 +87,8 @@ const createSale = async (req, res) => {
         type: "in",
         total: grand_total,
         tanggal: date_sale,
-        keterangan: "Penjualan",
+        bill: newBill,
+        keterangan: message,
       },
       { transaction }
     );

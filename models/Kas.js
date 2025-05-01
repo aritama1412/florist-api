@@ -21,6 +21,10 @@ const Kas = sequelize.define(
       type: DataTypes.INTEGER,
       allowNull: true,
     },
+    bill: {
+      type: DataTypes.STRING(155),
+      allowNull: false,
+    },
     type: {
       type: DataTypes.ENUM("in", "out"),
       defaultValue: "in",

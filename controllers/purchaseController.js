@@ -4,6 +4,7 @@ const Product = require("../models/Product");
 const Supplier = require("../models/Supplier");
 const { Sequelize, Op } = require("sequelize"); // Import Sequelize and Op from Sequelize
 const fs = require("fs");
+const Kas = require("../models/Kas");
 
 const getAllPurchases = async (req, res) => {
   try {
@@ -97,6 +98,31 @@ const createPurchase = async (req, res) => {
       quantity: detail.quantity,
       sub_total: detail.price * detail.quantity,
     }));
+
+    // the data is id_product, loop it and get product name from model Product
+    const productNames = await Promise.all(
+      details.map(async (detail) => {
+        const product = await Product.findByPk(detail.id_product, { transaction });
+        return product.product_name + " : " + detail.quantity ;
+      })
+    );
+
+    // create a string message
+    const message = productNames.join(", ");
+
+    // get the id sale
+    const id_purchase = newPurchase.id_purchase;
+    const kas = await Kas.create(
+      {
+        id_purchase,
+        type: "out",
+        total: grand_total,
+        tanggal: new Date(),
+        bill: newBill,
+        keterangan: message,
+      },
+      { transaction }
+    );
 
     await PurchaseDetail.bulkCreate(purchaseDetailsData, { transaction });
 
