@@ -3,7 +3,10 @@ const Sale = require("../models/Sale");
 const SaleDetail = require("../models/SaleDetail");
 const Product = require("../models/Product");
 const Kas = require("../models/Kas");
-const { Op } = require("sequelize");
+const { Op, Sequelize } = require("sequelize");
+const sequelize = require("../config/database"); // Import sequelize instance
+const Image = require("../models/Image");
+
 
 // ✅ Create a new sale
 const createSale = async (req, res) => {
@@ -306,10 +309,146 @@ const checkTransaction = async (req, res) => {
   }
 };
 
+const getSalesPerMonth = async (req, res) => {
+  try {
+    const { year } = req.query;
+    if (!year) {
+      return res.status(400).json({
+        status: "error",
+        message: "Year is required",
+      });
+    }
+
+    // Array of month names in Indonesian or localized format
+    const monthNames = [
+      "Januari", "Februari", "Maret", "April", "Mei", "Juni",
+      "Juli", "Agustus", "September", "Oktober", "November", "Desember"
+    ];
+
+    // Generate all months of the year with month names
+    const months = monthNames.map((name, i) => ({
+      month: name,
+      total_sales: 0, // Default value
+    }));
+
+    // Query sales data from the database
+    const sales = await Sale.findAll({
+      where: {
+        created_at: {
+          [Op.gte]: new Date(`${year}-01-01`),
+          [Op.lte]: new Date(`${year}-12-31`),
+        },
+      },
+      attributes: [
+        [Sequelize.fn("MONTH", Sequelize.col("created_at")), "month_index"], // Get month index (1-12)
+        [Sequelize.fn("SUM", Sequelize.col("grand_total")), "total_sales"],
+      ],
+      group: ["month_index"],
+      raw: true, // Returns plain objects instead of Sequelize instances
+    });
+
+    // Merge sales data into the months array
+    const mergedData = months.map((month, i) => {
+      const sale = sales.find((s) => parseInt(s.month_index, 10) === i + 1);
+      return sale ? { ...month, total_sales: parseFloat(sale.total_sales) } : month;
+    });
+
+    res.status(200).json({ status: "success", data: mergedData });
+  } catch (error) {
+    res.status(500).json({ status: "error", message: error.message });
+  }
+};
+
+const getProductSales = async (req, res) => {
+  try {
+    // Extract the year from query parameters
+    const { year } = req.query;
+
+    // Ensure the year parameter is provided
+    if (!year) {
+      return res.status(400).json({ error: "Year parameter is required." });
+    }
+
+    // Define the start and end of the year
+    const startDate = new Date(`${year}-01-01`);
+    const endDate = new Date(`${year}-12-31`);
+
+    // Query sale within range, then left join saledetails
+    const sales = await Sale.findAll({
+      where: {
+        date_sale: {
+          [Op.gte]: startDate,
+          [Op.lte]: endDate,
+        },
+      },
+      include: [
+        {
+          model: SaleDetail,
+          required: false, // Products with or without images
+          include: [
+            {
+              model: Product, // Include Product associated with each SaleDetail
+              attributes: ["id_product", "product_name", "price"], // Fetch only specific fields
+            },
+          ],
+        },
+      ],
+    });
+
+    // i want to get total quantity each product sold 
+    const productSales = {};
+
+    sales.forEach((sale) => {
+      sale.SaleDetails.forEach((saleDetail) => {
+        const productName = saleDetail.Product.product_name;
+        const quantity = saleDetail.quantity;
+        if (productSales[productName]) {
+          productSales[productName] += quantity;
+        } else {
+          productSales[productName] = quantity;
+        }
+      });
+    });
+
+    // Return the result
+    res.status(200).json({ status: "success", data: productSales });
+
+  } catch (error) {
+    console.error("Error fetching product sales:", error);
+    res.status(500).json({ error: "Internal server error." });
+  }
+};
+
+const lowStockProducts = async (req, res) => {
+  try {
+    const products = await Product.findAll({
+      include: [
+        {
+          model: Image,
+          as: "Images",
+          where: { status: "1" }, // Only active images
+          required: false,
+          limit: 1, // Fetch only one image per product
+        },
+      ],
+      order: [["stock", "ASC"]],
+      limit: 6,
+    });
+    res.status(200).json({ status: "success", data: products });
+  } catch (error) {
+    res.status(500).json({ status: "error", message: error.message });
+  }
+};
+
+
+
 module.exports = {
   createSale,
   editSale,
   getAllSales,
   getSaleById,
   checkTransaction,
+  getSalesPerMonth,
+  getProductSales,
+  lowStockProducts
 };

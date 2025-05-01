@@ -11,8 +11,8 @@ const Sale = sequelize.define(
   {
     id_sale: {
       type: DataTypes.INTEGER,
-      autoIncrement: true,
       primaryKey: true,
+      autoIncrement: true,
     },
     bill: {
       type: DataTypes.STRING(45),
@@ -36,9 +36,6 @@ const Sale = sequelize.define(
       defaultValue: 0.0,
     },
     status: {
-      // type: DataTypes.ENUM("0", "1", "2"),
-      // defaultValue: "0",
-      // comment: 
       type: DataTypes.ENUM("0", "1", "2", "3"),
       defaultValue: "0",
       comment: "0=menunggu pembayaran, 1=proses, 2=selesai, 3=batal",

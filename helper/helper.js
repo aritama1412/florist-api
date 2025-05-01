@@ -20,4 +20,19 @@ const getCurrentDateInv = () => {
   return `${yyyy}${mm}${dd}`;
 };
 
-module.exports = { getCurrentDate, getCurrentDateInv, getToday };
+// helpers.js
+const getDateRange = (month, year) => {
+  const startDate = new Date(year, month - 1, 1); // Start of the month
+  const endDate = new Date(year, month, 0); // End of the month
+  return {
+    createdAt: {
+      [Op.gte]: startDate,
+      [Op.lte]: endDate,
+    },
+  };
+};
+
+module.exports = { getDateRange };
+
+
+module.exports = { getCurrentDate, getCurrentDateInv, getToday, getDateRange };
