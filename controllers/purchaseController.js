@@ -8,6 +8,7 @@ const Kas = require("../models/Kas");
 
 const getAllPurchases = async (req, res) => {
   try {
+    // order by created_at DESC
     const purchase = await Purchase.findAll({
       include: [
         {
@@ -36,6 +37,7 @@ const getAllPurchases = async (req, res) => {
           ],
         },
       ],
+      order: [["purchase_date", "DESC"]],
     });
     res.status(200).json({ status: "success", data: purchase });
   } catch (error) {

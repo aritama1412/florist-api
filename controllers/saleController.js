@@ -215,7 +215,13 @@ const editSale = async (req, res) => {
 // ✅ Get all sales
 const getAllSales = async (req, res) => {
   try {
-    const sales = await Sale.findAll({ include: SaleDetail });
+    // order by created_at desc
+    const sales = await Sale.findAll(
+      { 
+        include: SaleDetail, 
+        order: [["created_at", "DESC"]] 
+      }
+    );
     res.status(200).json({ status: "success", data: sales });
   } catch (error) {
     res.status(500).json({ status: "error", message: error.message });

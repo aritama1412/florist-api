@@ -5,7 +5,7 @@ const { Sequelize, Op } = require("sequelize"); // Import Sequelize operators
 // ✅ Get all Supplier
 const getAllSupplier = async (req, res) => {
   try {
-    const { limit = 20, offset = 0 } = req.query; // Default values
+    const { limit = 2000, offset = 0 } = req.query; // Default values
 
     const suppliers = await Supplier.findAll({
       limit: limit,

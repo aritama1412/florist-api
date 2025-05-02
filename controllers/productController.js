@@ -82,14 +82,13 @@ const getAllProducts = async (req, res) => {
 };
 
 
-
 // ✅ Get all products
 const getAllProductsAdmin = async (req, res) => {
   try {
-    const { limit = 20, offset = 0, categories } = req.query;
+    const { limit = 2000, offset = 0, categories } = req.query;
 
     if (!categories) {
-      const limit = parseInt(req.query.limit) || 20; // Default to 20 items
+      const limit = parseInt(req.query.limit) || 2000; // Default to 20 items
       const offset = parseInt(req.query.offset) || 0; // Default to 0 (start)
 
       // Fetch products with associated images
@@ -99,7 +98,7 @@ const getAllProductsAdmin = async (req, res) => {
         include: [
           {
             model: Image,
-            where: { status: "1" }, // Only active images
+            // where: { status: "1" }, // Only active images
             required: false, // Products with or without images
           },
           {
