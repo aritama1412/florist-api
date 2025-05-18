@@ -42,10 +42,6 @@ const Product = sequelize.define(
       defaultValue: "1",
       comment: "0=nonaktif, 1=aktif",
     },
-    rating: {
-      type: DataTypes.FLOAT,
-      defaultValue: 0,
-    },
     created_by: {
       type: DataTypes.INTEGER,
       allowNull: false,
