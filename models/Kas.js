@@ -1,9 +1,5 @@
 const { DataTypes } = require("sequelize");
 const sequelize = require("../config/database");
-const { Op } = require("sequelize"); // Import Sequelize operators
-const path = require("path");
-const fs = require("fs");
-const multer = require("multer");
 
 const Kas = sequelize.define(
   "Kas",
@@ -41,7 +37,7 @@ const Kas = sequelize.define(
     keterangan: {
       type: DataTypes.TEXT,
       allowNull: true,
-    }
+    },
   },
   {
     tableName: "kas",

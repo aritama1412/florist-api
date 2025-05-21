@@ -1,6 +1,12 @@
 const { DataTypes } = require("sequelize");
 const sequelize = require("../config/database");
 const PurchaseDetail = require("./PurchaseDetail");
+const { Op } = require("sequelize"); // Import Sequelize operators
+const path = require("path");
+const fs = require("fs");
+const multer = require("multer");
+const SaleDetail = require("./SaleDetail");
+const Kas = require("./Kas");
 
 const Purchase = sequelize.define(
   "Purchase",
@@ -70,6 +76,12 @@ const Purchase = sequelize.define(
 Purchase.hasMany(PurchaseDetail, {
   foreignKey: "id_purchase", // The foreign key
   sourceKey: "id_purchase", // The primary key
+});
+
+// has one kas
+Purchase.hasOne(Kas, {
+  foreignKey: "id_purchase",
+  sourceKey: "id_purchase",
 });
 
 module.exports = Purchase;

@@ -5,6 +5,7 @@ const path = require("path");
 const fs = require("fs");
 const multer = require("multer");
 const SaleDetail = require("./SaleDetail");
+const Kas = require("./Kas");
 
 const Sale = sequelize.define(
   "Sale",
@@ -92,6 +93,12 @@ const Sale = sequelize.define(
 Sale.hasMany(SaleDetail, {
   foreignKey: "id_sale", // The foreign key
   sourceKey: "id_sale", // The primary key
+});
+
+// sale has one kas
+Sale.hasOne(Kas, {
+  foreignKey: "id_sale",
+  sourceKey: "id_sale",
 });
 
 module.exports = Sale;

@@ -123,7 +123,7 @@ const createSale = async (req, res) => {
     for (const { id_product, totalQuantity } of Object.values(aggregatedDetails)) {
       const product = await Product.findByPk(id_product, { transaction });
       if (!product) {
-        throw new Error(`Product with ID ${id_product} not found.`);
+        throw new Error(`Prodwuct with ID ${id_product} not found.`);
       }
       product.stock -= totalQuantity;
       await product.save({ transaction });

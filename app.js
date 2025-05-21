@@ -9,6 +9,7 @@ const userRoutes = require("./routes/userRoutes");
 const saleRoutes = require("./routes/saleRoutes");
 const purchaseRoutes = require("./routes/purchaseRoutes");
 const authRoutes = require("./routes/authRoutes");
+const cashflowRoutes = require("./routes/cashflowRoutes");
 const verifyTokenMiddleware = require("./middleware/verifyToken");
 
 const app = express();
@@ -34,6 +35,7 @@ app.use("/users", userRoutes);
 app.use("/sales", saleRoutes);
 app.use("/purchases", purchaseRoutes);
 app.use("/auth", authRoutes);
+app.use("/cashflow", cashflowRoutes);
 
 // Sync the database and start the server
 sequelize.sync({ force: false }).then(() => {
