@@ -6,6 +6,7 @@ const productController = require("../controllers/productController");
 router.get("/get-all-products", productController.getAllProducts); // ✅ Get all
 router.get("/get-all-products-admin", productController.getAllProductsAdmin); // ✅ Get all
 router.get("/get-product", productController.getProductById);
+router.get("/get-low-stock", productController.getLowStock);
 router.post("/delete", productController.deleteProduct);
 // router.post("/create", productController.createProduct); // ✅ Create a new
 router.post(

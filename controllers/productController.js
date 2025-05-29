@@ -408,19 +408,53 @@ const deleteProduct = async (req, res) => {
   }
 };
 
+// ✅ Get all products
+const getLowStock = async (req, res) => {
+  try {
+    const { limit = 2000, offset = 0, categories } = req.query;
 
-module.exports = {
-  createProduct,
-  upload,
+    // const limit = parseInt(req.query.limit) || 2000; // Default to 20 items
+    // const offset = parseInt(req.query.offset) || 0; // Default to 0 (start)
+
+    // Fetch products with associated images
+    // select only  ["id_product", "product_name", "price", "stock"], from 
+
+    const products = await Product.findAll({
+      limit: limit,
+      offset: offset,
+      attributes: ["id_product", "product_name", "price", "stock", "status"],
+      where: {
+        stock: {
+          [Op.lte]: 3,
+        },
+        status: "1",
+      },
+
+    });
+
+    return res.status(200).json({
+      status: "success",
+      message: "Products retrieved successfully",
+      data: products,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      status: "error",
+      message: error.message,
+      data: null,
+    });
+  }
 };
 
 // Export the controller functions
 module.exports = {
+  createProduct,
+  upload,
   getAllProducts,
   getAllProductsAdmin,
   getProductById,
   createProduct,
   editProduct,
   deleteProduct,
-  upload,
+  getLowStock,
 };
