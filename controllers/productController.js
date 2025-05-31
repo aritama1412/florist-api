@@ -446,6 +446,59 @@ const getLowStock = async (req, res) => {
   }
 };
 
+const deleteImage = async (req, res) => {
+  const transaction = await Image.sequelize.transaction();
+
+  try {
+    const {id_image} = req.body;
+    
+    if (
+      !id_image) {
+      return res.status(400).json({
+        status: "error",
+        message: "Missing required fields",
+        data: req.body,
+      });
+    }
+
+    const existingImage = await Image.findByPk(id_image);
+    if (!existingImage) {
+      return res.status(404).json({
+        status: "error",
+        message: "Image not found",
+        data: null,
+      });
+    }
+
+    // hard delete image data
+    await Image.destroy({
+      where: {
+        id_image: id_image
+      }
+    })
+
+    await transaction.commit();
+    
+    //remove image from storage path is /uploads/20250428_16798.jpg, remove first /
+    const img = existingImage.image.slice(1)
+    fs.unlinkSync(img)
+
+    return res.status(200).json({
+      status: "success",
+      message: "Image deleted successfully",
+      data: null,
+    });
+  } catch (error) {
+    await transaction.rollback();
+    return res.status(500).json({
+      status: "error",
+      message: error.message,
+      data: null,
+    });
+  }
+};
+
+
 // Export the controller functions
 module.exports = {
   createProduct,
@@ -457,4 +510,5 @@ module.exports = {
   editProduct,
   deleteProduct,
   getLowStock,
+  deleteImage,
 };

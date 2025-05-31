@@ -8,6 +8,7 @@ router.get("/get-all-products-admin", productController.getAllProductsAdmin); //
 router.get("/get-product", productController.getProductById);
 router.get("/get-low-stock", productController.getLowStock);
 router.post("/delete", productController.deleteProduct);
+router.post("/delete-image", productController.deleteImage);
 // router.post("/create", productController.createProduct); // ✅ Create a new
 router.post(
   "/create",
