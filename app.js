@@ -21,6 +21,10 @@ const PORT = process.env.PORT || 3005;
 // Function to serve all static files
 // inside public directory.
 // app.use(express.static("public/uploads"));
+// url to / add welcome, service running
+app.get("/", (req, res) => {
+  res.send("Welcome to Florist API");
+});
 app.use("/uploads", express.static("uploads"));
 
 app.get("/test", (req, res) => {
