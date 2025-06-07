@@ -16,7 +16,7 @@ const app = express();
 // Enable CORS for all routes and all origins
 app.use(cors()); // Allow all origins (not recommended for production)
 app.use(express.json());
-const PORT = process.env.PORT || 3005;
+const PORT = process.env.PORT || 4000;
 
 // Function to serve all static files
 // inside public directory.
