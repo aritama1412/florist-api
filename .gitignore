@@ -18,7 +18,8 @@ temp/
 # Node modules
 node_modules/
 
-# config/*
+config/
+config/*
 
 # Environment variables
 .env
