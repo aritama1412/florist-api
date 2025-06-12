@@ -192,11 +192,8 @@ const editSale = async (req, res) => {
       return `${year}-${formattedMonth}-${formattedDay}`;
     };
     
-    const formattedDateEstimation = formatDate(date_estimation);
-    const formattedDateReceived = formatDate(date_received);
-
-    console.log('formattedDateEstimation', formattedDateEstimation)
-    console.log('formattedDateReceived', formattedDateReceived)
+    const formattedDateEstimation = date_estimation != null? formatDate(date_estimation):null;
+    const formattedDateReceived = date_received != null? formatDate(date_received):null;
 
     await existingSale.update(
       {

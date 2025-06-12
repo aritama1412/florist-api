@@ -18,6 +18,8 @@ temp/
 # Node modules
 node_modules/
 
+config/*
+
 # Environment variables
 .env
 .env.local
