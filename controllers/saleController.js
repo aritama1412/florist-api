@@ -7,8 +7,6 @@ const { Op, Sequelize } = require("sequelize");
 const sequelize = require("../config/database"); // Import sequelize instance
 const Image = require("../models/Image");
 
-
-// ✅ Create a new sale
 const createSale = async (req, res) => {
   const transaction = await Sale.sequelize.transaction();
   // get yyyy-mm-dd
@@ -184,16 +182,24 @@ const editSale = async (req, res) => {
         data: null,
       });
     }
-    const formatDate = (date) => {
-      const { year, month, day } = date;
-      // Ensure month and day are always two digits
-      const formattedMonth = month.toString().padStart(2, '0');
-      const formattedDay = day.toString().padStart(2, '0');
-      return `${year}-${formattedMonth}-${formattedDay}`;
-    };
     
-    const formattedDateEstimation = date_estimation != null? formatDate(date_estimation):null;
-    const formattedDateReceived = date_received != null? formatDate(date_received):null;
+    const formatDate = (dateString) => {
+      const date = new Date(dateString); // Parse the date string
+      if (isNaN(date)) {
+        return null; // Return null if the date is invalid
+      }
+
+      // Extract year, month, and day
+      const year = date.getUTCFullYear();
+      const month = (date.getUTCMonth() + 1).toString().padStart(2, '0'); // Months are 0-indexed
+      const day = date.getUTCDate().toString().padStart(2, '0');
+
+      return `${year}-${month}-${day}`;
+    };
+
+    // Example usage:
+    const formattedDateReceived = date_received ? formatDate(date_received) : null;
+    const formattedDateEstimation = date_estimation ? formatDate(date_estimation) : null;
 
     await existingSale.update(
       {
@@ -224,7 +230,6 @@ const editSale = async (req, res) => {
   }
 };
 
-// ✅ Get all sales
 const getAllSales = async (req, res) => {
   try {
     // order by created_at desc
@@ -240,7 +245,6 @@ const getAllSales = async (req, res) => {
   }
 };
 
-// ✅ Get a sale by ID
 const getSaleById = async (req, res) => {
   try {
     const { id } = req.query;
@@ -458,6 +462,69 @@ const lowStockProducts = async (req, res) => {
   }
 };
 
+const getNotifications = async (req, res) => {
+  try {
+    const sales = await Sale.findAll(
+      { 
+        where: {
+          is_seen: "0"
+        },
+        order: [["created_at", "DESC"]] 
+      }
+    );
+    res.status(200).json({ status: "success", data: sales });
+  } catch (error) {
+    res.status(500).json({ status: "error", message: error.message });
+  }
+};
+
+const seen = async (req, res) => {
+  const transaction = await Sale.sequelize.transaction();
+
+  try {
+    const { id_sale } = req.query;
+
+    if (!id_sale) {
+      return res.status(400).json({
+        status: "error",
+        message: "Missing required fields",
+        data: req.body,
+      });
+    }
+
+    const existingSale = await Sale.findByPk(id_sale);
+    if (!existingSale) {
+      return res.status(404).json({
+        status: "error",
+        message: "Transaction not found",
+        data: null,
+      });
+    }
+
+    await existingSale.update(
+      {
+        id_sale,
+        is_seen: '1',
+      },
+      { transaction }
+    );
+
+    await transaction.commit();
+
+    return res.status(201).json({
+      status: "success",
+      message: "Transaction edited successfully",
+      data: existingSale,
+    });
+  } catch (error) {
+    await transaction.rollback();
+    return res.status(500).json({
+      status: "error",
+      message: error.message,
+      data: null,
+    });
+  }
+};
 
 
 module.exports = {
@@ -468,5 +535,7 @@ module.exports = {
   checkTransaction,
   getSalesPerMonth,
   getProductSales,
-  lowStockProducts
+  lowStockProducts,
+  getNotifications,
+  seen
 };

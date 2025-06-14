@@ -82,6 +82,9 @@ const Sale = sequelize.define(
       type: DataTypes.DATE,
       allowNull: true,
     },
+    is_seen: {
+      type: DataTypes.ENUM("0", "1"),
+    },
   },
   {
     tableName: "sale",

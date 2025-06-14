@@ -14,7 +14,12 @@ const verifyTokenMiddleware = require("./middleware/verifyToken");
 
 const app = express();
 // Enable CORS for all routes and all origins
-app.use(cors()); // Allow all origins (not recommended for production)
+app.use(
+  cors({
+    origin: ["http://localhost:3000", "https://pondokdaun.beauty"],
+      methods: ["GET", "POST", "PATCH", "PUT", "DELETE", "OPTIONS"],
+  })
+); // Allow all origins (not recommended for production)
 app.use(express.json());
 const PORT = process.env.PORT || 4000;
 

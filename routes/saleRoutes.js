@@ -10,5 +10,7 @@ router.get("/check", saleController.checkTransaction);
 router.get("/get-sales-per-month", saleController.getSalesPerMonth);
 router.get("/get-product-sales", saleController.getProductSales);
 router.get("/get-low-stock-products", saleController.lowStockProducts);
+router.get("/get-notifications", saleController.getNotifications);
+router.get("/seen", saleController.seen);
 
 module.exports = router;
