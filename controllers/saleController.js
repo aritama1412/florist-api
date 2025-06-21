@@ -448,14 +448,18 @@ const lowStockProducts = async (req, res) => {
         {
           model: Image,
           as: "Images",
-          where: { status: "1" }, // Only active images
           required: false,
           limit: 1, // Fetch only one image per product
         },
       ],
       order: [["stock", "ASC"]],
-      // limit: 6,
-    });
+      where: {
+        status: "1",
+        stock: {
+          [Op.lte]: 3
+        }
+      },
+    })
     res.status(200).json({ status: "success", data: products });
   } catch (error) {
     res.status(500).json({ status: "error", message: error.message });
