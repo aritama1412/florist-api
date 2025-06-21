@@ -454,7 +454,7 @@ const lowStockProducts = async (req, res) => {
         },
       ],
       order: [["stock", "ASC"]],
-      limit: 6,
+      // limit: 6,
     });
     res.status(200).json({ status: "success", data: products });
   } catch (error) {
