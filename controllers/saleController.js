@@ -331,7 +331,7 @@ const checkTransaction = async (req, res) => {
   }
 };
 
-const getSalesPerMonth = async (req, res) => {
+const getSalesByYear = async (req, res) => {
   try {
     const { year } = req.query;
     if (!year) {
@@ -441,6 +441,72 @@ const getProductSales = async (req, res) => {
   }
 };
 
+const getProductSalesByDate = async (req, res) => {
+  try {
+    // Extract the year and month from query parameters
+    const { year, month } = req.query;
+
+    // Ensure the year and month parameters are provided
+    if (!year || !month) {
+      return res.status(400).json({ error: "Year and month parameters are required." });
+    }
+
+    // Ensure the month is valid (1-12)
+    if (month < 1 || month > 12) {
+      return res.status(400).json({ error: "Invalid month parameter. Must be between 1 and 12." });
+    }
+
+    // Define the start and end of the month
+    const startDate = new Date(`${year}-${month.padStart(2, '0')}-01`);
+    const endDate = new Date(startDate);
+    endDate.setMonth(startDate.getMonth() + 1); // Move to the next month
+    endDate.setDate(0); // Set to the last day of the current month
+
+    // Query sale within range, then left join saledetails
+    const sales = await Sale.findAll({
+      where: {
+        date_sale: {
+          [Op.gte]: startDate,
+          [Op.lte]: endDate,
+        },
+      },
+      include: [
+        {
+          model: SaleDetail,
+          required: false, // Products with or without images
+          include: [
+            {
+              model: Product, // Include Product associated with each SaleDetail
+              attributes: ["id_product", "product_name", "price"], // Fetch only specific fields
+            },
+          ],
+        },
+      ],
+    });
+
+    // Calculate total quantity for each product sold
+    const productSales = {};
+
+    sales.forEach((sale) => {
+      sale.SaleDetails.forEach((saleDetail) => {
+        const productName = saleDetail.Product.product_name;
+        const quantity = saleDetail.quantity;
+        if (productSales[productName]) {
+          productSales[productName] += quantity;
+        } else {
+          productSales[productName] = quantity;
+        }
+      });
+    });
+
+    // Return the result
+    res.status(200).json({ status: "success", data: productSales });
+  } catch (error) {
+    console.error("Error fetching product sales:", error);
+    res.status(500).json({ error: "Internal server error." });
+  }
+};
+
 const lowStockProducts = async (req, res) => {
   try {
     const products = await Product.findAll({
@@ -537,9 +603,10 @@ module.exports = {
   getAllSales,
   getSaleById,
   checkTransaction,
-  getSalesPerMonth,
+  getSalesByYear,
   getProductSales,
   lowStockProducts,
   getNotifications,
-  seen
+  seen,
+  getProductSalesByDate
 };
