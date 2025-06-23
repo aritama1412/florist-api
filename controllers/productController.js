@@ -460,6 +460,7 @@ const deleteImage = async (req, res) => {
       });
     }
 
+    // Get image record from DB
     const existingImage = await Image.findByPk(id_image);
     if (!existingImage) {
       return res.status(404).json({
@@ -469,17 +470,14 @@ const deleteImage = async (req, res) => {
       });
     }
 
-    // Hard delete image data from DB
+    // OPTIONAL: delete from DB
     await Image.destroy({
-      where: {
-        id_image: id_image
-      },
+      where: { id_image },
       transaction
     });
-
     await transaction.commit();
 
-    // Remove image file if it exists
+    // Safe file deletion
     const imgPath = existingImage.image.startsWith('/')
       ? existingImage.image.slice(1)
       : existingImage.image;
@@ -493,6 +491,7 @@ const deleteImage = async (req, res) => {
       message: "Image deleted successfully",
       data: null,
     });
+
   } catch (error) {
     await transaction.rollback();
     return res.status(500).json({
