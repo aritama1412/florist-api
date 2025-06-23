@@ -16,7 +16,7 @@ const app = express();
 // Enable CORS for all routes and all origins
 app.use(
   cors({
-    origin: ["http://localhost:3000", "https://pondokdaun.beauty"],
+    origin: ["http://localhost:3000", "http://localhost:3003", "https://pondokdaun.beauty"],
       methods: ["GET", "POST", "PATCH", "PUT", "DELETE", "OPTIONS"],
   })
 ); // Allow all origins (not recommended for production)
