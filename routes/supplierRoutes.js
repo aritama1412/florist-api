@@ -6,5 +6,6 @@ router.get("/get-all-suppliers", supplierController.getAllSupplier); // ✅ Get 
 router.get("/get-supplier", supplierController.getSupplierById);
 router.post("/create", supplierController.createSupplier); // ✅ Create a new
 router.patch("/edit", supplierController.editSupplier); // ✅ Create a new
+router.post("/delete", supplierController.deleteSupplier);
 
 module.exports = router;

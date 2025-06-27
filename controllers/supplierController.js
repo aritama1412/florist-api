@@ -20,6 +20,7 @@ const getAllSupplier = async (req, res) => {
           ],
         ],
       },
+      order: [["supplier_name", "ASC"]],
     });
 
     return res.status(200).json({
@@ -166,10 +167,59 @@ const editSupplier = async (req, res) => {
   }
 };
 
+const deleteSupplier = async (req, res) => {
+  const transaction = await Supplier.sequelize.transaction();
+
+  try {
+    const {id_supplier} = req.body;
+
+    if (
+      !id_supplier) {
+      return res.status(400).json({
+        status: "error",
+        message: "Missing required fields",
+        data: req.body,
+      });
+    }
+
+    const existingSuplier = await Supplier.findByPk(id_supplier);
+    if (!existingSuplier) {
+      return res.status(404).json({
+        status: "error",
+        message: "Supplier not found",
+        data: null,
+      });
+    }
+
+    await existingSuplier.update(
+      {
+        status: '0',
+      },
+      { transaction }
+    );
+
+    await transaction.commit();
+    
+    return res.status(201).json({
+      status: "success",
+      message: "Supplier deleted successfully",
+      data: existingSuplier,
+    });
+  } catch (error) {
+    await transaction.rollback();
+    return res.status(500).json({
+      status: "error",
+      message: error.message,
+      data: null,
+    });
+  }
+};
+
 // Export the controller functions
 module.exports = {
   getAllSupplier,
   getSupplierById,
   createSupplier,
   editSupplier,
+  deleteSupplier
 };
