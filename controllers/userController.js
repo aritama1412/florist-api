@@ -22,7 +22,8 @@ const createUser = async (req, res) => {
 // ✅ Get all users
 const getAllUsers = async (req, res) => {
   try {
-    const users = await User.findAll();
+    // order by name asc
+    const users = await User.findAll({ order: [["name", "ASC"]] });
     res.status(200).json({ status: "success", data: users });
   } catch (error) {
     res.status(500).json({ status: "error", message: error.message });
